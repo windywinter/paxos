@@ -36,7 +36,7 @@ for f in os.listdir(tests):
                 prev = None
                 for i in range(json['count']):
                     # check the number of lines in output
-                    if len(out) < out_index + 1:
+                    if out_index >= len(out):
                         result = False
                         break
                     # check if all the outputs are identical
