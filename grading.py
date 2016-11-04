@@ -38,6 +38,7 @@ for f in os.listdir(tests):
                     # check the number of lines in output
                     if len(out) < out_index + 1:
                         result = False
+                        break
                     # check if all the outputs are identical
                     if prev is not None and prev != out[out_index]:
                         result = False
