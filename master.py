@@ -3,7 +3,7 @@
 The master program for CS5414 three phase commit project.
 """
 
-import sys, os
+import sys
 import subprocess
 import time
 from threading import Thread, Lock
@@ -23,6 +23,7 @@ wait_chat_log = False
 class ClientHandler(Thread):
     def __init__(self, index, address, port):
         Thread.__init__(self)
+        self.daemon = True
         self.index = index
         self.sock = socket(AF_INET, SOCK_STREAM)
         self.sock.connect((address, port))
@@ -99,7 +100,7 @@ def exit(exit=False):
         threads[k].close()
     subprocess.Popen(['./stopall'], stdout=open('/dev/null'), stderr=open('/dev/null'))
     time.sleep(0.1)
-    os._exit(0)
+    sys.exit(0)
 
 def timeout():
     time.sleep(120)
@@ -109,6 +110,7 @@ def main():
     global threads, wait_chat_log
     global wait_for_ack
     timeout_thread = Thread(target = timeout, args = ())
+    timeout_thread.daemon = True
     timeout_thread.start()
 
     while True:
