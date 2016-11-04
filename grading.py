@@ -12,7 +12,6 @@ if len(sys.argv) == 2:
     tests = sys.argv[1]
 try:
     shutil.rmtree(test_output)
-    pass
 except:
     pass
 os.mkdir(test_output)
