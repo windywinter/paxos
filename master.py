@@ -121,6 +121,14 @@ def main():
             exit()
         line = line.strip() # remove trailing '\n'
         if line == 'exit': # exit when reading 'exit' command
+            if wait_for_ack: # waitForAck wait_for_acks these commands
+                time.sleep(2)
+                if wait_for_ack:
+                    ack_lock.acquire()
+                    to_resend = wait_for_ack_list.copy()
+                    ack_lock.release()
+                    for m in to_resend:
+                        send(to_resend[m], msgs[m])
             while wait_for_ack:
                 time.sleep(0.1)
             exit()
@@ -135,7 +143,7 @@ def main():
             ack_lock.acquire()
             if mid not in acked_list:
                 wait_for_ack = True
-                wait_for_ack_list[mid] = True
+                wait_for_ack_list[mid] = pid
             ack_lock.release()
         elif cmd == 'start':
             port = int(sp2[3])
@@ -147,18 +155,26 @@ def main():
             threads[pid] = handler
             handler.start()
         else:
-            wait = wait_for_ack
-            while wait: # waitForAck wait_for_acks these commands
+            if wait_for_ack: # waitForAck wait_for_acks these commands
                 time.sleep(2)
-                wait = wait_for_ack
+                if wait_for_ack:
+                    ack_lock.acquire()
+                    to_resend = wait_for_ack_list.copy()
+                    ack_lock.release()
+                    for m in to_resend:
+                        send(to_resend[m], msgs[m])
+            while wait_for_ack:
+                time.sleep(0.1)
+
             if cmd == 'msg': # message msgid msg
-                msgs[sp2[2]] = sp2[3]
+                msgs[int(sp2[2])] = sp1[1]
                 send(pid, sp1[1])
             elif cmd[:5] == 'crash': # crashXXX
                 send(pid, sp1[1])
             elif cmd == 'get': # get chatLog
                 while wait_chat_log: # get command blocks next get command
                     time.sleep(0.1)
+                time.sleep(1)
                 send(pid, sp1[1], set_wait=True)
 
 if __name__ == '__main__':
