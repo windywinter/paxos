@@ -130,7 +130,8 @@ def main():
                     to_resend = wait_for_ack_list.copy()
                     ack_lock.release()
                     for m in to_resend:
-                        send(to_resend[m], msgs[m])
+                        if to_resend[m] >= 0:
+                            send(to_resend[m], msgs[m])
             while wait_for_ack:
                 time.sleep(0.1)
             exit()
@@ -164,7 +165,7 @@ def main():
                     to_resend = wait_for_ack_list.copy()
                     ack_lock.release()
                     for m in to_resend:
-                        if m >= 0:
+                        if to_resend[m] >= 0:
                             send(to_resend[m], msgs[m])
             while wait_for_ack:
                 time.sleep(0.1)
