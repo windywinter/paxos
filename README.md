@@ -17,6 +17,7 @@ reads "count" lines from your output, (2) checks if they are identical, (3)
 checks if it includes everything in "mandatory", and (4) checks if it doesn't
 include anything not in "mandatory" or "optional".
 
+Update:
 
-More test cases are on the way...
-Same as the 3PC project, I will give out 8 public test cases.
+More test cases are added. Please feel free to let me know if you think there
+is any mistake in the test cases.
