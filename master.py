@@ -190,9 +190,11 @@ def main():
             elif cmd[:5] == 'crash': # crashXXX
                 send(pid, sp1[1])
             elif cmd == 'get': # get chatLog
-                while wait_chat_log: # get command blocks next get command
-                    time.sleep(0.1)
-                time.sleep(1)
+                if not wait_chat_log: # sleep for the first continous get command
+                    time.sleep(1)
+                else:
+                    while wait_chat_log: # get command blocks next get command
+                        time.sleep(0.1)
                 send(pid, sp1[1], set_wait=True)
 
 if __name__ == '__main__':
