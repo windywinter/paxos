@@ -19,6 +19,9 @@ acked_list = {}
 wait_for_ack_list = {}
 wait_for_ack = False
 wait_chat_log = False
+
+started_processes = {}
+
 debug = False
 
 class ClientHandler(Thread):
@@ -108,7 +111,7 @@ def timeout():
     exit(True)
 
 def main():
-    global threads, wait_chat_log, wait_for_ack, debug
+    global threads, wait_chat_log, wait_for_ack, started_processes, debug
     timeout_thread = Thread(target = timeout, args = ())
     timeout_thread.daemon = True
     timeout_thread.start()
@@ -150,6 +153,14 @@ def main():
             ack_lock.release()
         elif cmd == 'start':
             port = int(sp2[3])
+            # sleep a while if a process is going to recover -- to avoid the
+            # case that the process is started but the previous one hasn't
+            # crashed.
+            if pid not in started_processes:
+                started_processes[pid] = True
+            else:
+                time.sleep(2)
+            # start the process
             if debug:
                 subprocess.Popen(['./process', str(pid), sp2[2], sp2[3]])
             else:
