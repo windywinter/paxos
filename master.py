@@ -19,6 +19,7 @@ acked_list = {}
 wait_for_ack_list = {}
 wait_for_ack = False
 wait_chat_log = False
+debug = False
 
 class ClientHandler(Thread):
     def __init__(self, index, address, port):
@@ -107,8 +108,7 @@ def timeout():
     exit(True)
 
 def main():
-    global threads, wait_chat_log
-    global wait_for_ack
+    global threads, wait_chat_log, wait_for_ack, debug
     timeout_thread = Thread(target = timeout, args = ())
     timeout_thread.daemon = True
     timeout_thread.start()
@@ -150,7 +150,10 @@ def main():
             ack_lock.release()
         elif cmd == 'start':
             port = int(sp2[3])
-            subprocess.Popen(['./process', str(pid), sp2[2], sp2[3]], stdout=open('/dev/null'), stderr=open('/dev/null'))
+            if debug:
+                subprocess.Popen(['./process', str(pid), sp2[2], sp2[3]])
+            else:
+                subprocess.Popen(['./process', str(pid), sp2[2], sp2[3]], stdout=open('/dev/null'), stderr=open('/dev/null'))
             # sleep for a while to allow the process be ready
             time.sleep(1)
             # connect to the port of the pid
@@ -182,4 +185,6 @@ def main():
                 send(pid, sp1[1], set_wait=True)
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == 'debug':
+        debug = True
     main()
