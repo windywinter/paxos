@@ -355,15 +355,16 @@ def server_handler(clientsock, peer_id):
                         for index in range(2, len(s), 3):
                             sync_msg_id = int(s[index])
                             sync_msg = s[index + 1]
-                            sync_seq_id = s[index + 2]
+                            sync_seq_id = int(s[index + 2])
                             if sync_msg_id not in msgs:
                                 msgs[sync_msg_id] = sync_msg
+                            if sync_seq_id not in chatLog:
                                 chatLog[sync_seq_id] = sync_msg_id
                             if sync_msg_id in paxos_instances:
-                                paxos_instances[sync_msg_id].final_value = int(sync_seq_id)
+                                paxos_instances[sync_msg_id].final_value = sync_seq_id
                             else:
                                 paxos_instances[sync_msg_id] = paxos_instance(sync_msg_id)
-                                paxos_instances[sync_msg_id].final_value = int(sync_seq_id)
+                                paxos_instances[sync_msg_id].final_value = sync_seq_id
                             # paxos_instances[instance].storage.remove(sync_msg_id)
         else:
             logging.info('connection from %d closed', peer_id)
