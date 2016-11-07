@@ -1,9 +1,11 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 import sys
 import os
 import thread
 import socket
 import time
+import json
 
 SERVER_PORT_BASE = 20000
 PAXOS_TIMEOUT = 0.5
@@ -11,17 +13,20 @@ PAXOS_TIMEOUT = 0.5
 pid = int(sys.argv[1])
 max_process = int(sys.argv[2])
 master_port = int(sys.argv[3])
+'''
+Sockets
+'''
 master_sock = None
+process_sock = {} # index by pid
 
 import logging
-logging.basicConfig(format = '[%d] %(levelname)s: %(message)s' % pid, level = logging.DEBUG)
+logging.basicConfig(format = '['+str(pid)+'] %(levelname)s: %(message)s', level = logging.DEBUG)
 
 paxos_instances = dict()
 
 '''
 Chat log
 '''
-
 chatLog = {} # sequence id -> message id
 msgs = {} # message id -> msg
 
@@ -43,16 +48,39 @@ partialPrepare = []
 partialAcceptReq = []
 partialDecision = []
 
-'''
-Sockets
-'''
-process_sock = {} # index by pid
 
-# Paxos定义
-# Instance ID    message id
-# proposal ID    通过pid+N*r生成——递增、全局（with in or out instance）唯一
-# value            sequence id
-# sequence id    initial by proposal ID
+class stable_storage:
+    file = None
+    data = {'chatlog': chatLog, 'msgs': msgs, 'paxos': dict()}
+    
+    def __init__(self):
+        if self.file is None:
+            stable_storage.file = open('%s.log' % pid, 'w')
+            json.dump(self.data, self.file)
+    
+    def save(self, instance):
+        if instance not in self.data['paxos']:
+            self.data['paxos'][instance] = dict()
+        self.data['paxos'][instance]['next_proposal_id'] = paxos_instances[instance].next_proposal_id
+        self.data['paxos'][instance]['promised_id'] = paxos_instances[instance].promised_id
+        self.data['paxos'][instance]['accepted_id'] = paxos_instances[instance].accepted_id
+        self.data['paxos'][instance]['accepted_value'] = paxos_instances[instance].accepted_value
+        json.dump(self.data, self.file)
+        
+    def remove(self, instance):
+        del self.data['paxos'][instance]
+        json.dump(self.data, self.file)
+
+# restore from log
+if os.path.isfile('%d.log' %(pid)):
+    with open('%s.log' % pid, 'r') as logfile:
+        try:
+            stable_storage.data = json.load(logfile)
+            chatLog = stable_storage.data['chatlog']
+            msgs = stable_storage.data['msgs']
+            paxos_instances = stable_storage.data['paxos'].copy()
+        except:
+            pass
 
 class messenger:
     def __init__(self, message_id):
@@ -133,8 +161,14 @@ class messenger:
         if crashAfterAcceptAck:
             os._exit(1)
     
+# Paxos定义
+# Instance ID    message id
+# proposal ID    通过pid+N*r生成——递增、全局（with in or out instance）唯一
+# value          sequence id
+# sequence id    initial by proposal ID
+
 class proposer:
-    storage = None   #stable storage API
+    storage = stable_storage()   #stable storage API
     next_proposal_id = pid
 
     def __init__(self, message_id, messenger):
@@ -152,7 +186,7 @@ class proposer:
         self.accept_rcvd = set()
         self.proposal_id = self.next_proposal_id
         self.next_proposal_id += max_process
-        self.storage.save(self)
+        self.storage.save(self.instance_id)
         self.messenger.send_prepare(self.proposal_id)
     
     def recv_promise(self, from_pid, proposal_id, prev_accepted_id, prev_accepted_value):
@@ -179,18 +213,19 @@ class proposer:
             self.messenger.send_decision(self.final_value)
 
 class acceptor:
-    storage = None
+    storage = stable_storage()
 
-    def __init__(self, messenger):
+    def __init__(self, message_id, messenger):
+        self.instance_id = message_id
         self.promised_id = None
         self.accepted_id = None
         self.accepted_value = None
         self.messenger = messenger #server-server comm API
 
     def recv_prepare(self, from_pid, proposal_id):
-        if proposal_id == self.promised_id:
-            self.messenger.send_promise(from_pid, proposal_id, self.accepted_id, self.accepted_value)
-        elif proposal_id > self.promised_id:
+        # '=' appears only if message is duplicated
+        if proposal_id >= self.promised_id:
+            self.storage.save(self.instance_id)
             self.promised_id = proposal_id
             self.messenger.send_promise(from_pid, proposal_id, self.accepted_id, self.accepted_value)
         else:
@@ -198,6 +233,7 @@ class acceptor:
 
     def recv_accept_request(self, from_pid, proposal_id, value):
         if proposal_id >= self.promised_id:
+            self.storage.save(self.instance_id)
             self.promised_id = proposal_id
             self.accepted_id = proposal_id
             self.accepted_value = value
@@ -209,7 +245,7 @@ class paxos_instance(proposer, acceptor):
     def __init__(self, message_id):
         m = messenger(message_id)
         proposer.__init__(message_id, m)
-        acceptor.__init__(m)
+        acceptor.__init__(message_id, m)
 
     def prepare(self):
         self.proposer.prepare()
@@ -265,6 +301,7 @@ def server_handler(clientsock, addr):
                 elif s[1] == 'decision':
                     paxos_instances[instance].final_value = int(s[3])
                     chatLog[paxos_instances[instance].final_value] = instance
+                    paxos_instances[instance].storage.remove(instance)
             elif s[0] == 'sync':
                 if s[1] == 'req':
                     res = 'sync ack'
@@ -283,6 +320,7 @@ def server_handler(clientsock, addr):
                         else:
                             paxos_instances[sync_msg_id] = paxos_instance(sync_msg_id)
                             paxos_instances[sync_msg_id].final_value = int(sync_seq_id)
+                        paxos_instances[instance].storage.remove(sync_msg_id)
         else:
             logging.info('connection from %d closed', peer_id)
             clientsock.close()
@@ -295,6 +333,7 @@ def paxos_loop(instance):
         paxos_instances[instance].prepare()
         time.sleep(PAXOS_TIMEOUT)
     chatLog[paxos_instances[instance].final_value] = instance
+    paxos_instances[instance].storage.remove(instance)
     master_sock.sendall("ack %d %d" % (instance, paxos_instances[instance].final_value))
 
 def master_handler():
@@ -350,6 +389,7 @@ def master_handler():
     logging.info('process %d exits')
     os._exit(1)
     
+
 sock_to_master = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock_to_master.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sock_to_master.bind(('localhost', master_port))
