@@ -408,6 +408,9 @@ def master_handler():
                     logging.debug('chatLog: ' + res[:-1] + '\n')
                     master_sock.sendall('chatLog ' + res[:-1] + '\n')
                 elif s[0] == 'crash':
+                    master_sock.close()
+                    logging.info('process %d exits', pid)
+                    os._exit(1)
                     break
                 elif s[0] == 'crashAfterP1b':
                     crashAfterPromise = True
@@ -468,8 +471,8 @@ for i in range(0, max_process):
     process_sock[i].bind(('localhost', SERVER_SRC_PORT_BASE+pid))
     status = process_sock[i].connect_ex(('localhost', SERVER_PORT_BASE+i))
     if status == 0:
-        thread.start_new_thread(server_handler, (process_sock[i], i))
         process_sock[i].sendall("sync req\n")
+        thread.start_new_thread(server_handler, (process_sock[i], i))
     else:
         process_sock[i] = None
 
