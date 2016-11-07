@@ -1,14 +1,14 @@
-[0] INFO: connection from 1 established
 [1] INFO: connection from 0 established
+[0] INFO: connection from 1 established
 [0] DEBUG: data received from 1: sync req
 
 [1] DEBUG: data received from 0: sync ack
 
 [0] INFO: connection from 2 established
 [1] INFO: connection from 2 established
-[2] INFO: connection from 0 established
 [0] DEBUG: data received from 2: sync req
 
+[2] INFO: connection from 0 established
 [1] DEBUG: data received from 2: sync req
 
 [2] INFO: connection from 1 established
@@ -16,43 +16,45 @@
 
 [2] DEBUG: data received from 1: sync ack
 
+[0] INFO: connection from 3 established
+[3] INFO: connection from 0 established
 [0] DEBUG: data received from master: msg 0 WhatsYourName
 
-[3] INFO: connection from 0 established
-[0] INFO: connection from 3 established
 [0] DEBUG: data received from 3: sync req
+
+[3] INFO: connection from 1 established
+[2] DEBUG: data received from 0: paxos prepare 0 0 WhatsYourName
 
 [1] DEBUG: data received from 0: paxos prepare 0 0 WhatsYourName
 
-[2] DEBUG: data received from 0: paxos prepare 0 0 WhatsYourName
+[1] INFO: connection from 3 established
+[3] INFO: connection from 2 established
+[0] DEBUG: data received from 2: paxos promise 0 0 -1 -1
 
 [3] DEBUG: data received from 0: sync ack
 
-[0] DEBUG: data received from 1: paxos promise 0 0 -1 -1
-
-[0] DEBUG: data received from 2: paxos promise 0 0 -1 -1
-
-[3] INFO: connection from 1 established
-[1] INFO: connection from 3 established
 [1] DEBUG: data received from 3: sync req
 
-[2] INFO: connection from 3 established
-[1] DEBUG: data received from 0: paxos accept_req 0 0 0
+[0] DEBUG: data received from 1: paxos promise 0 0 -1 -1
 
 [3] DEBUG: data received from 0: paxos prepare 0 0 WhatsYourName
 
+[1] DEBUG: data received from 0: paxos accept_req 0 0 0
+
+[3] DEBUG: data received from 1: sync ack
+
 [2] DEBUG: data received from 0: paxos accept_req 0 0 0
 
+[0] DEBUG: data received from 3: paxos promise 0 0 -1 -1
+
+[3] DEBUG: data received from 0: paxos accept_req 0 0 0
+
+[2] INFO: connection from 3 established
 [0] DEBUG: data received from 1: paxos accept_ack 0 0 0
 
 [2] DEBUG: data received from 3: sync req
 
 [0] DEBUG: data received from 2: paxos accept_ack 0 0 0
-
-[3] DEBUG: data received from 0: paxos accept_req 0 0 0
-
-[3] INFO: connection from 2 established
-[0] DEBUG: data received from 3: paxos promise 0 0 -1 -1
 
 [3] DEBUG: data received from 2: sync ack
 
@@ -60,11 +62,9 @@
 
 [2] DEBUG: data received from 0: paxos decision 0 0
 
-[3] DEBUG: data received from 0: paxos decision 0 0
-
 [0] DEBUG: data received from 3: paxos accept_ack 0 0 0
 
-[3] DEBUG: data received from 1: sync ack
+[3] DEBUG: data received from 0: paxos decision 0 0
 
 [1] DEBUG: data received from master: msg 1 Alice
 
@@ -72,131 +72,967 @@
 
 [3] DEBUG: data received from master: msg 3 Carol
 
-[1] DEBUG: data received from 2: paxos prepare 2 2 Bob
+[0] DEBUG: data received from 2: paxos prepare 2 2 Bob
 
 [3] DEBUG: data received from 2: paxos prepare 2 2 Bob
 
-[2] DEBUG: data received from 1: paxos prepare 1 1 Alice
+[2] DEBUG: data received from 0: paxos promise 2 2 -1 -1
 
-[0] DEBUG: data received from 1: paxos prepare 1 1 Alice
-
-[1] DEBUG: data received from 2: paxos promise 1 1 -1 -1
-
-[2] DEBUG: data received from 1: paxos promise 2 2 -1 -1
-
-[0] DEBUG: data received from 2: paxos prepare 2 2 Bob
-
-[3] DEBUG: data received from 1: paxos prepare 1 1 Alice
-
-[1] DEBUG: data received from 0: paxos promise 1 1 -1 -1
+[1] DEBUG: data received from 2: paxos prepare 2 2 Bob
 
 [2] DEBUG: data received from 3: paxos promise 2 2 -1 -1
 
-[1] DEBUG: data received from 3: paxos promise 1 1 -1 -1
+[0] DEBUG: data received from 3: paxos prepare 3 3 Carol
 
-[2] DEBUG: data received from 0: paxos promise 2 2 -1 -1
-
-[0] DEBUG: data received from 1: paxos accept_req 1 1 1
-
-[3] DEBUG: data received from 1: paxos accept_req 1 1 1
-
-[1] DEBUG: data received from 3: paxos prepare 3 3 Carol
-
-[1] DEBUG: data received from 2: paxos accept_req 2 2 2
+[2] DEBUG: data received from 3: paxos prepare 3 3 Carol
 
 [3] DEBUG: data received from 2: paxos accept_req 2 2 2
 
-[0] DEBUG: data received from 3: paxos prepare 3 3 Carol
+[0] DEBUG: data received from 1: paxos prepare 1 1 Alice
 
-[2] DEBUG: data received from 1: paxos accept_req 1 1 1
-
-[1] DEBUG: data received from 0: paxos accept_ack 1 1 1
-
-[3] DEBUG: data received from 1: paxos promise 3 3 -1 -1
-
-[0] DEBUG: data received from 2: paxos accept_req 2 2 2
-
-[2] DEBUG: data received from 1: paxos accept_ack 2 2 2
+[1] DEBUG: data received from 3: paxos prepare 3 3 Carol
 
 [3] DEBUG: data received from 0: paxos promise 3 3 -1 -1
 
-[1] DEBUG: data received from 2: paxos accept_ack 1 1 1
+[2] DEBUG: data received from 3: paxos accept_ack 2 2 2
+
+[0] DEBUG: data received from 2: paxos accept_req 2 2 2
+
+[2] DEBUG: data received from 1: paxos promise 2 2 -1 -1
+
+[3] DEBUG: data received from 2: paxos promise 3 3 -1 -1
+
+[1] DEBUG: data received from 2: paxos accept_req 2 2 2
 
 [2] DEBUG: data received from 0: paxos accept_ack 2 2 2
 
 [0] DEBUG: data received from 3: paxos accept_req 3 3 3
 
-[1] DEBUG: data received from 3: paxos accept_ack 1 1 1
+[2] DEBUG: data received from 1: paxos prepare 1 1 Alice
 
-[3] DEBUG: data received from 0: paxos accept_ack 3 3 3
-
-[0] DEBUG: data received from 1: paxos decision 1 1
-
-[2] DEBUG: data received from 1: paxos decision 1 1
-
-[1] DEBUG: data received from 3: paxos accept_req 3 3 3
-
-[2] DEBUG: data received from 3: paxos prepare 3 3 Carol
-
-[3] DEBUG: data received from 1: paxos decision 1 1
-
-[3] DEBUG: data received from 1: paxos accept_ack 3 3 3
-
-[2] DEBUG: data received from 3: paxos accept_ack 2 2 2
-paxos accept_req 3 3 3
-
-[3] DEBUG: data received from 2: paxos promise 3 3 -1 -1
+[3] DEBUG: data received from 1: paxos promise 3 3 -1 -1
 
 [0] DEBUG: data received from 2: paxos decision 2 2
 
-[1] DEBUG: data received from 2: paxos decision 2 2
+[1] DEBUG: data received from 0: paxos promise 1 1 -1 -1
 
-[2] DEBUG: data received from 3: sync ack 3 Carol 3
-paxos decision 3 3
+[2] DEBUG: data received from 1: paxos accept_ack 2 2 2
 
 [3] DEBUG: data received from 2: paxos decision 2 2
 
-[1] DEBUG: data received from 3: paxos decision 3 3
+[1] DEBUG: data received from 3: paxos accept_req 3 3 3
 
-[0] DEBUG: data received from 3: paxos decision 3 3
+[2] DEBUG: data received from 3: paxos accept_req 3 3 3
+
+[1] DEBUG: data received from 2: paxos decision 2 2
+
+[3] DEBUG: data received from 0: paxos accept_ack 3 3 3
+
+[1] DEBUG: data received from 2: paxos promise 1 1 -1 -1
 
 [3] DEBUG: data received from 2: paxos accept_ack 3 3 3
 
-[2] DEBUG: data received from 3: sync ack 3 Carol 3
+[2] DEBUG: data received from 1: paxos accept_req 1 1 1
 
-[3] DEBUG: data received from 2: sync ack 3 Carol 3
+[0] DEBUG: data received from 1: paxos accept_req 1 1 1
 
-[0] DEBUG: data received from master: get chatLog
+[3] DEBUG: data received from 1: paxos prepare 1 1 Alice
 
-[0] DEBUG: chatLog: WhatsYourName,Alice,Bob,Carol
+[1] DEBUG: data received from 2: sync ack 2 Bob 2
 
-[1] DEBUG: data received from master: get chatLog
+Unhandled exception in thread started by <function server_handler at 0x7f974b13ff50>[0] DEBUG: data received from 3: paxos decision 3 3
 
-[1] DEBUG: chatLog: WhatsYourName,Alice,Bob,Carol
+[2] DEBUG: data received from 3: paxos decision 3 3
 
-[2] DEBUG: data received from master: get chatLog
+[1] DEBUG: data received from 3: paxos decision 3 3
 
-[2] DEBUG: chatLog: WhatsYourName,Alice,Bob
+[3] DEBUG: data received from 1: paxos accept_ack 3 3 3
+paxos accept_req 1 1 1
 
-[3] DEBUG: data received from master: get chatLog
 
-[3] DEBUG: chatLog: WhatsYourName,Alice,Bob,Carol
+Traceback (most recent call last):
+  File "./process", line 321, in server_handler
+[1] DEBUG: data received from 0: paxos accept_ack 1 1 1
 
-WhatsYourName,Alice,Bob,Carol
-WhatsYourName,Alice,Bob,Carol
-WhatsYourName,Alice,Bob
-WhatsYourName,Alice,Bob,Carol
-[3] INFO: connection from master closed
-[3] INFO: process 3 exits
-[1] INFO: connection from 3 closed
-[0] INFO: connection from 3 closed
-[2] INFO: connection from 3 closed
-[2] INFO: connection from master closed
-[2] INFO: process 2 exits
-[0] INFO: connection from 2 closed
-[1] INFO: connection from 2 closed
-[1] INFO: connection from master closed
-[1] INFO: process 1 exits
-[0] INFO: connection from master closed
-[0] INFO: connection from 1 closed
-[0] INFO: process 0 exits
+    if sync_seq_id not in chatlog:
+[1] DEBUG: data received from 3: paxos promise 1 1 -1 -1
+
+NameError: global name 'chatlog' is not defined
+[1] DEBUG: data received from 3: sync ack 3 Carol 3
+paxos accept_ack 1 1 1
+
+Unhandled exception in thread started by <function server_handler at 0x7f974b13ff50>
+Traceback (most recent call last):
+  File "./process", line 321, in server_handler
+    if sync_seq_id not in chatlog:
+NameError: global name 'chatlog' is not defined
+[3] DEBUG: data received from 1: paxos prepare 1 5 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 5 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 5 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 5 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 9 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 9 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 9 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 9 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 13 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 13 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 13 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 13 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 17 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 17 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 17 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 17 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 21 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 21 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 21 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 21 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 25 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 25 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 25 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 25 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 29 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 29 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 29 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 29 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 33 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 33 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 33 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 33 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 37 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 37 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 37 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 37 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 41 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 41 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 41 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 41 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 45 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 45 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 45 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 45 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 49 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 49 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 49 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 49 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 53 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 53 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 53 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 53 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 57 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 57 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 57 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 57 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 61 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 61 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 61 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 61 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 65 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 65 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 65 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 65 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 69 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 69 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 69 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 69 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 73 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 73 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 73 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 73 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 77 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 77 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 77 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 77 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 81 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 81 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 81 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 81 1 1
+
+[0] DEBUG: data received from 1: paxos prepare 1 85 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 85 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 85 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 85 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 89 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 89 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 89 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 89 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 93 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 93 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 93 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 93 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 97 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 97 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 97 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 97 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 101 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 101 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 101 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 101 1 1
+
+[0] DEBUG: data received from 1: paxos prepare 1 105 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 105 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 105 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 105 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 109 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 109 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 109 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 109 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 113 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 113 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 113 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 113 1 1
+
+[0] DEBUG: data received from 1: paxos prepare 1 117 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 117 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 117 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 117 1 1
+
+[0] DEBUG: data received from 1: paxos prepare 1 121 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 121 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 121 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 121 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 125 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 125 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 125 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 125 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 129 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 129 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 129 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 129 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 133 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 133 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 133 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 133 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 137 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 137 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 137 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 137 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 141 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 141 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 141 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 141 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 145 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 145 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 145 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 145 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 149 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 149 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 149 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 149 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 153 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 153 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 153 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 153 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 157 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 157 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 157 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 157 1 1
+
+[0] DEBUG: data received from 1: paxos prepare 1 161 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 161 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 161 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 161 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 165 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 165 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 165 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 165 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 169 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 169 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 169 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 169 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 173 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 173 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 173 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 173 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 177 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 177 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 177 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 177 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 181 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 181 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 181 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 181 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 185 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 185 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 185 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 185 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 189 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 189 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 189 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 189 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 193 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 193 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 193 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 193 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 197 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 197 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 197 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 197 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 201 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 201 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 201 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 201 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 205 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 205 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 205 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 205 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 209 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 209 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 209 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 209 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 213 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 213 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 213 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 213 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 217 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 217 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 217 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 217 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 221 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 221 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 221 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 221 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 225 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 225 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 225 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 225 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 229 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 229 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 229 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 229 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 233 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 233 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 233 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 233 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 237 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 237 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 237 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 237 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 241 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 241 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 241 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 241 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 245 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 245 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 245 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 245 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 249 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 249 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 249 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 249 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 253 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 253 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 253 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 253 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 257 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 257 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 257 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 257 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 261 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 261 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 261 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 261 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 265 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 265 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 265 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 265 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 269 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 269 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 269 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 269 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 273 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 273 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 273 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 273 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 277 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 277 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 277 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 277 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 281 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 281 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 281 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 281 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 285 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 285 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 285 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 285 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 289 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 289 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 289 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 289 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 293 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 293 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 293 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 293 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 297 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 297 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 297 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 297 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 301 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 301 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 301 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 301 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 305 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 305 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 305 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 305 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 309 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 309 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 309 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 309 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 313 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 313 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 313 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 313 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 317 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 317 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 317 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 317 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 321 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 321 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 321 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 321 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 325 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 325 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 325 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 325 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 329 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 329 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 329 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 329 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 333 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 333 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 333 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 333 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 337 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 337 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 337 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 337 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 341 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 341 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 341 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 341 1 1
+
+[2] DEBUG: data received from 1: paxos prepare 1 345 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 345 Alice
+
+[3] DEBUG: data received from 1: paxos prepare 1 345 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 345 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 349 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 349 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 349 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 349 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 353 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 353 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 353 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 353 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 357 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 357 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 357 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 357 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 361 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 361 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 361 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 361 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 365 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 365 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 365 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 365 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 369 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 369 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 369 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 369 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 373 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 373 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 373 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 373 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 377 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 377 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 377 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 377 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 381 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 381 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 381 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 381 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 385 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 385 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 385 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 385 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 389 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 389 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 389 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 389 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 393 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 393 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 393 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 393 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 397 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 397 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 397 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 397 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 401 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 401 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 401 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 401 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 405 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 405 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 405 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 405 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 409 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 409 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 409 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 409 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 413 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 413 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 413 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 413 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 417 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 417 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 417 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 417 1 1
+
+[3] DEBUG: data received from 1: paxos prepare 1 421 Alice
+
+[2] DEBUG: data received from 1: paxos prepare 1 421 Alice
+
+[0] DEBUG: data received from 1: paxos prepare 1 421 Alice
+
+[1] DEBUG: data received from 0: paxos promise 1 421 1 1
+
+Traceback (most recent call last):
+Traceback (most recent call last):
+Traceback (most recent call last):
+  File "./process", line 435, in <module>
+  File "./process", line 435, in <module>
+  File "./process", line 435, in <module>
+    sock, addr = sock_to_server.accept()
+  File "/usr/lib/python2.7/socket.py", line 206, in accept
+        sock, addr = sock_to_server.accept()
+sock, addr = sock_to_server.accept()
+  File "/usr/lib/python2.7/socket.py", line 206, in accept
+  File "/usr/lib/python2.7/socket.py", line 206, in accept
+    sock, addr = self._sock.accept()
+KeyboardInterrupt
+        sock, addr = self._sock.accept()
+sock, addr = self._sock.accept()
+KeyboardInterruptKeyboardInterrupt
+
+Traceback (most recent call last):
+  File "./process", line 435, in <module>
+    sock, addr = sock_to_server.accept()
+  File "/usr/lib/python2.7/socket.py", line 206, in accept
+    sock, addr = self._sock.accept()
+KeyboardInterrupt
+Traceback (most recent call last):
+  File "./master.py", line 203, in <module>
+    main()
+  File "./master.py", line 185, in main
+    time.sleep(0.1)
+KeyboardInterrupt
