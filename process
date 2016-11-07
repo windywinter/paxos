@@ -188,7 +188,7 @@ class proposer(object):
         self.accept_rcvd = set()
         self.proposal_id = self.next_proposal_id
         self.next_proposal_id += max_process
-        self.storage.save(self.instance_id)
+        # self.storage.save(self.instance_id)
         self.messenger.send_prepare(self.proposal_id)
     
     def recv_promise(self, from_pid, proposal_id, prev_accepted_id, prev_accepted_value):
@@ -227,7 +227,7 @@ class acceptor(object):
     def recv_prepare(self, from_pid, proposal_id):
         # '=' appears only if message is duplicated
         if proposal_id >= self.promised_id:
-            self.storage.save(self.instance_id)
+            # self.storage.save(self.instance_id)
             self.promised_id = proposal_id
             self.messenger.send_promise(from_pid, proposal_id, self.accepted_id, self.accepted_value)
         else:
@@ -235,7 +235,7 @@ class acceptor(object):
 
     def recv_accept_request(self, from_pid, proposal_id, value):
         if proposal_id >= self.promised_id:
-            self.storage.save(self.instance_id)
+            # self.storage.save(self.instance_id)
             self.promised_id = proposal_id
             self.accepted_id = proposal_id
             self.accepted_value = value
@@ -303,7 +303,7 @@ def server_handler(clientsock, peer_id):
                     elif s[1] == 'decision':
                         paxos_instances[instance].final_value = int(s[3])
                         chatLog[paxos_instances[instance].final_value] = instance
-                        paxos_instances[instance].storage.remove(instance)
+                        # paxos_instances[instance].storage.remove(instance)
                 elif s[0] == 'sync':
                     if s[1] == 'req':
                         res = 'sync ack'
@@ -318,12 +318,13 @@ def server_handler(clientsock, peer_id):
                             sync_seq_id = s[index + 2]
                             if sync_msg_id not in msgs:
                                 msgs[sync_msg_id] = sync_msg
+                                chatlog[sync_seq_id] = sync_msg_id
                             if sync_msg_id in paxos_instances:
                                 paxos_instances[sync_msg_id].final_value = int(sync_seq_id)
                             else:
                                 paxos_instances[sync_msg_id] = paxos_instance(sync_msg_id)
                                 paxos_instances[sync_msg_id].final_value = int(sync_seq_id)
-                            paxos_instances[instance].storage.remove(sync_msg_id)
+                            # paxos_instances[instance].storage.remove(sync_msg_id)
         else:
             logging.info('connection from %d closed', peer_id)
             clientsock.close()
@@ -336,13 +337,16 @@ def paxos_loop(instance):
         paxos_instances[instance].prepare()
         time.sleep(PAXOS_TIMEOUT)
     chatLog[paxos_instances[instance].final_value] = instance
-    paxos_instances[instance].storage.remove(instance)
+    # paxos_instances[instance].storage.remove(instance)
     master_sock.sendall("ack %d %d\n" % (instance, paxos_instances[instance].final_value))
 
 def master_handler():
     global msgs, paxos_instances, chatLog, master_sock
     while True:
-        data = master_sock.recv(256)
+        try:
+            data = master_sock.recv(256)
+        except Exception, e:
+            pass
         if data:
             logging.debug("data received from master: " + data)
             s = data.split()
@@ -357,8 +361,8 @@ def master_handler():
                 res = ''
                 for _, msg_id in chatLog.items():
                     res = res + msgs[msg_id] + ','
-                logging.debug('chatLog: ' + res[:-1])
-                master_sock.sendall('chatLog ' + res[:-1])
+                logging.debug('chatLog: ' + res[:-1] + '\n')
+                master_sock.sendall('chatLog ' + res[:-1] + '\n')
             elif s[0] == 'crash':
                 break
             elif s[0] == 'crashAfterP1b':
