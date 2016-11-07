@@ -1,2 +1,384 @@
-#!/bin/bash
+#!/usr/bin/python
+import sys
+import os
+import thread
+import socket
+import time
 
+SERVER_PORT_BASE = 20000
+PAXOS_TIMEOUT = 0.5
+
+pid = int(sys.argv[1])
+max_process = int(sys.argv[2])
+master_port = int(sys.argv[3])
+master_sock = None
+
+import logging
+logging.basicConfig(format = '[%d] %(levelname)s: %(message)s' % pid, level = logging.DEBUG)
+
+paxos_instances = dict()
+
+'''
+Chat log
+'''
+
+chatLog = {} # sequence id -> message id
+msgs = {} # message id -> msg
+
+'''
+Crash flags
+'''
+# Proposer
+crashAfterPrepare = False
+crashAfterAcceptReq = False
+crashAfterDecision = False
+# Acceptor
+crashAfterPromise = False
+crashAfterAcceptAck = False
+
+'''
+Crash partial process
+'''
+partialPrepare = []
+partialAcceptReq = []
+partialDecision = []
+
+'''
+Sockets
+'''
+process_sock = {} # index by pid
+
+# Paxos定义
+# Instance ID    message id
+# proposal ID    通过pid+N*r生成——递增、全局（with in or out instance）唯一
+# value            sequence id
+# sequence id    initial by proposal ID
+
+class messenger:
+    def __init__(self, message_id):
+        self.instance_id = message_id
+    '''
+    Proposer : prepare, accept_req, decision
+    '''
+    # "paxos prepare <instance_id> <proposal_id> <msg>
+    def send_prepare(self, proposal_id):
+        global crashAfterPrepare, partialPrepare, process_sock
+        command = 'paxos prepare %d %d %s' % (self.instance_id, proposal_id, msgs[self.instance_id])
+        if crashAfterPrepare:
+            for p in partialPrepare:
+                if process_sock[p] is not None:
+                    process_sock[p].sendall(command)
+            os._exit(1)
+        else:
+            for p in range(max_process):
+                if p == pid or process_sock[p] is None:
+                    continue
+                process_sock[p].sendall(command)
+    
+    # 'paxos accept_req <instance_id> <proposal_id> <proposed_value>'
+    def send_accept_req(self, proposal_id, proposed_value):
+        global crashAfterAcceptReq, partialAcceptReq, process_sock
+        command = 'paxos accept_req %d %d %d' % (self.instance_id, proposal_id, proposed_value)
+        if crashAfterAcceptReq:
+            for p in partialAcceptReq:
+                if process_sock[p] is not None:
+                    process_sock[p].sendall(command)
+            os._exit(1)
+        else:
+            for p in range(max_process):
+                if p == pid or process_sock[p] is None:
+                    continue
+                process_sock[p].sendall(command)
+    
+    # 'paxos decision <instance_id> <final_value>'
+    def send_decision(self, final_value):
+        global crashAfterDecision, partialDecision, process_sock
+        command = 'paxos decision %d %d' % (self.instance_id, final_value)
+        if crashAfterDecision:
+            for p in partialDecision:
+                if process_sock[p] is None:
+                    process_sock[p].sendall(command)
+            os._exit(1)
+        else:
+            for p in range(max_process):
+                if p == pid or process_sock[p] is None:
+                    continue
+                process_sock[p].sendall(command)
+    
+    '''
+    Acceptor : promise, reject, accept_ack
+    '''
+    # 'paxos promise <instance_id> <proposal_id> <accepted_id> <accepted_value>'
+    def send_promise(self, from_id, proposal_id, accepted_id, accepted_value):
+        global process_sock, crashAfterPromise
+        command = 'paxos promise %d %d %d %d' % (self.instance_id ,proposal_id, accepted_id, accepted_value)
+        if process_sock[from_id] is not None:
+            process_sock[from_id].sendall(command)
+        if crashAfterPromise:
+            os._exit(1)
+        
+    # 'paxos rej <instance_id> <proposal_id> <promise_id>'
+    def send_rej(self, from_id, proposal_id, promise_id):
+        global process_sock
+        command = 'paxos rej %d %d %d' % (self.instance_id, proposal_id, promise_id)
+        if process_sock[from_id] is not None:
+            process_sock[from_id].sendall(command)
+    
+    # 'paxos accept_ack <instance_id> <proposal_id> <accepted_value>'
+    def send_accept_ack(self, from_id, proposal_id, accepted_value):
+        global process_sock, crashAfterAcceptAck
+        command = 'paxos accept_ack %d %d %d' % (self.instance_id, proposal_id, accepted_value)
+        if process_sock[from_id] is not None:
+            process_sock[from_id].sendall(command)
+        if crashAfterAcceptAck:
+            os._exit(1)
+    
+class proposer:
+    storage = None   #stable storage API
+    next_proposal_id = pid
+
+    def __init__(self, message_id, messenger):
+        self.instance_id = message_id
+        self.proposal_id = None
+        self.proposed_value = None
+        self.promises_rcvd = None
+        self.last_accepted_id = None
+        self.accept_rcvd = None
+        self.final_value = None
+        self.messenger = messenger #server-server comm API
+      
+    def prepare(self):
+        self.promises_rcvd = set()
+        self.accept_rcvd = set()
+        self.proposal_id = self.next_proposal_id
+        self.next_proposal_id += max_process
+        self.storage.save(self)
+        self.messenger.send_prepare(self.proposal_id)
+    
+    def recv_promise(self, from_pid, proposal_id, prev_accepted_id, prev_accepted_value):
+        if proposal_id != self.proposal_id or from_pid in self.promises_rcvd:
+            return
+        self.promises_rcvd.add(from_pid)
+        if prev_accepted_id > self.last_accepted_id:
+            self.last_accepted_id = prev_accepted_id
+            if prev_accepted_value is not None:
+                self.proposed_value = prev_accepted_value
+
+        if len(self.promises_rcvd) == max_process/2:
+            if self.proposed_value is None:
+                self.proposed_value = self.proposal_id
+            self.messenger.send_accept_req(self.proposal_id, self.proposed_value)
+                
+    def recv_accept_ack(self, from_pid, proposal_id, value):
+        if proposal_id != self.proposal_id or from_pid in self.accept_rcvd:
+            return
+        self.accept_rcvd.add(from_pid)
+        
+        if len(self.accept_rcvd) == max_process/2:
+            self.final_value = value
+            self.messenger.send_decision(self.final_value)
+
+class acceptor:
+    storage = None
+
+    def __init__(self, messenger):
+        self.promised_id = None
+        self.accepted_id = None
+        self.accepted_value = None
+        self.messenger = messenger #server-server comm API
+
+    def recv_prepare(self, from_pid, proposal_id):
+        if proposal_id == self.promised_id:
+            self.messenger.send_promise(from_pid, proposal_id, self.accepted_id, self.accepted_value)
+        elif proposal_id > self.promised_id:
+            self.promised_id = proposal_id
+            self.messenger.send_promise(from_pid, proposal_id, self.accepted_id, self.accepted_value)
+        else:
+            self.messenger.send_rej(from_pid, proposal_id, self.promised_id)
+
+    def recv_accept_request(self, from_pid, proposal_id, value):
+        if proposal_id >= self.promised_id:
+            self.promised_id = proposal_id
+            self.accepted_id = proposal_id
+            self.accepted_value = value
+            self.messenger.send_accept_ack(from_pid, proposal_id, self.accepted_value)
+        else:
+            self.messenger.send_rej(from_pid, proposal_id, self.promised_id)
+
+class paxos_instance(proposer, acceptor):
+    def __init__(self, message_id):
+        m = messenger(message_id)
+        proposer.__init__(message_id, m)
+        acceptor.__init__(m)
+
+    def prepare(self):
+        self.proposer.prepare()
+        if self.proposal_id > self.promised_id:
+            self.promised_id = self.proposal_id
+            self.recv_promise(pid, self.promised_id, self.accepted_id, self.accepted_value)
+
+    def recv_promise(self, from_pid, proposal_id, prev_accepted_id, prev_accepted_value):
+        self.proposer.recv_promise(from_pid, proposal_id, prev_accepted_id, prev_accepted_value)
+        if len(self.promises_rcvd) == max_process/2:
+            self.recv_accept_request(pid, self.proposal_id, self.proposed_value)
+    
+    def recv_accept_request(self, from_pid, proposal_id, value):
+        self.accepter.recv_accept_request(from_pid, proposal_id, value)
+        if proposal_id >= self.promised_id:
+            self.recv_accept_ack(pid, proposal_id, self.accepted_value)
+
+def server_handler(clientsock, addr):
+    global msgs, process_sock, paxos_incetances, chatLog
+    peer_id = addr[1] - SERVER_PORT_BASE
+    process_sock[peer_id] = clientsock
+    logging.info('connection from %d established', peer_id)
+    while True:
+        data = clientsock.recv(256)
+        if data:
+            logging.debug("data received from %d: " + data, peer_id)
+            s = data.split()
+            if s[0] == 'paxos':
+                instance = int(s[2])
+                # if the value has already been decided
+                if instance in paxos_incetances and paxos_instances[instance].final_value:
+                    clientsock.sendall('sync ack %d %s %d' % (instance, msgs[instance], paxos_instances[instance].final_value))
+                    continue
+                # Receive prepare, act as acceptor
+                if s[1] == 'prepare':
+                    if instance not in msgs:
+                        msgs[instance] = s[4]
+                    if instance not in paxos_instances:
+                        paxos_instances[instance] = paxos_instance(instance)
+                    paxos_instances[instance].recv_prepare(peer_id, int(s[3]))
+                # Recieve promise/reject, act as proposer
+                elif s[1] == 'promise':
+                    paxos_instances[instance].recv_promise(peer_id, int(s[3]), int(s[4]), int(s[5]))
+                elif s[1] == 'rej':
+                    pass
+                # Receive accept request, act as acceptor
+                elif s[1] == 'accept_req':
+                    paxos_instances[instance].recv_accept_request(peer_id, int(s[3]), int(s[4]))
+                # Recieve accept ACK, act as proposer
+                elif s[1] == 'accept_ack':
+                    paxos_instances[instance].recv_accept_ack(peer_id, int(s[3]), int(s[4]))
+                # Recieve final decision, act as acceptor
+                elif s[1] == 'decision':
+                    paxos_instances[instance].final_value = int(s[3])
+                    chatLog[paxos_instances[instance].final_value] = instance
+            elif s[0] == 'sync':
+                if s[1] == 'req':
+                    res = 'sync ack'
+                    for seq_id, msg_id in chatLog.items():
+                        res = res + (' %d %s %d' % (msg_id, msgs[msg_id], seq_id))
+                    clientsock.sendall(res)
+                elif s[1] == 'ack':
+                    for index in range(2, len(s), 3):
+                        sync_msg_id = int(s[index])
+                        sync_msg = s[index + 1]
+                        sync_seq_id = s[index + 2]
+                        if sync_msg_id not in msgs:
+                            msgs[sync_msg_id] = sync_msg
+                        if sync_msg_id in paxos_instances:
+                            paxos_instances[sync_msg_id].final_value = int(sync_seq_id)
+                        else:
+                            paxos_instances[sync_msg_id] = paxos_instance(sync_msg_id)
+                            paxos_instances[sync_msg_id].final_value = int(sync_seq_id)
+        else:
+            logging.info('connection from %d closed', peer_id)
+            clientsock.close()
+            process_sock[peer_id] = None
+            break
+
+def paxos_loop(instance):
+    global chatLog
+    while not paxos_instances[instance].final_value:
+        paxos_instances[instance].prepare()
+        time.sleep(PAXOS_TIMEOUT)
+    chatLog[paxos_instances[instance].final_value] = instance
+    master_sock.sendall("ack %d %d" % (instance, paxos_instances[instance].final_value))
+
+def master_handler():
+    global msgs, paxos_instances, chatLog, master_sock
+    while True:
+        data = master_sock.recv(256)
+        if data:
+            logging.debug("data received from master: " + data)
+            s = data.split()
+            if s[0] == 'msg':
+                msg_id = int(s[1])
+                # msg = s[2]
+                if msg_id not in msgs:
+                    msgs[msg_id] = s[2]
+                    paxos_instances[msg_id] = paxos_instance(msg_id)
+                thread.start_new_thread(paxos_loop, (msg_id,))
+            elif s[0] == 'get' and s[1] == 'chatLog':
+                res = ''
+                for _, msg_id in chatLog.items():
+                    res = res + msgs[msg_id] + ','
+                master_sock.sendall('chatLog ' + res[:-1])
+            elif s[0] == 'crash':
+                break
+            elif s[0] == 'crashAfterP1b':
+                crashAfterPromise = True
+            elif s[0] == 'crashAfterP2b':
+                crashAfterAcceptAck = True
+            elif s[0] == 'crashP1a':
+                crashAfterPrepare = True
+                if len(s) == 1:
+                    partialPrepare = []
+                else:
+                    for i in range(1, len(s)):
+                        partialPrepare.append(int(s[i]))
+            elif s[0] == 'crashP2a':
+                crashAfterAcceptReq = True
+                if len(s) == 1:
+                    partialAcceptReq = []
+                else:
+                    for i in range(1, len(s)):
+                        partialAcceptReq.append(int(s[i]))
+            elif s[0] == 'crashDecision':
+                crashAfterDecision = True
+                if len(s) == 1:
+                    partialDecision = []
+                else:
+                    for i in range(1, len(s)):
+                        partialDecision.append(int(s[i]))
+        else:
+            logging.info('connection from master closed')
+            break
+    master_sock.close()
+    logging.info('process %d exits')
+    os._exit(1)
+    
+sock_to_master = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock_to_master.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+sock_to_master.bind(('localhost', master_port))
+# Listen for incoming connections
+sock_to_master.listen(1)
+# Wait for a master connection
+# Blocking until got connection from master
+master_sock, _ = sock_to_master.accept()
+# start new thread to handle master connection
+thread.start_new_thread(master_handler, ())
+
+# create socket for server to server communication
+sock_to_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock_to_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+sock_to_server.bind(('localhost', SERVER_PORT_BASE+pid))
+sock_to_server.listen(20)
+
+for i in range(0, max_process):
+    if i == pid:
+        # skip self
+        continue
+    process_sock[i] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    status = process_sock[i].connect_ex(('localhost', SERVER_PORT_BASE+i))
+    if status == 0:
+        process_sock[i].sendall("sync req")
+    else:
+        process_sock[i] = None
+
+while True:
+    # wait for a connection from other process
+    s_connection, s_client_address = sock_to_server.accept()
+    thread.start_new_thread(server_handler, (s_connection, s_client_address))
