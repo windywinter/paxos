@@ -20,14 +20,14 @@
 5 crashDecision 0
 4 msg 3 NVM
 5 msg 4 Hahaha
--1 waitForAck 4
+0 waitForAck 4
 4 start 6 10009
 5 start 6 10010
-3 start 6 10011
+5 msg 5 finally
+-1 waitForAck 5
 0 get chatLog
 1 get chatLog
 2 get chatLog
-3 get chatLog
 4 get chatLog
 5 get chatLog
 exit
