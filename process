@@ -20,7 +20,7 @@ master_sock = None
 process_sock = {pid: None} # index by pid
 
 import logging
-logging.basicConfig(format = '['+str(pid)+'] %(levelname)s: %(message)s', level = logging.ERROR)
+logging.basicConfig(format = '['+str(pid)+'] %(levelname)s: %(message)s', level = logging.DEBUG)
 
 paxos_instances = dict()
 
@@ -360,7 +360,6 @@ def server_handler(clientsock, peer_id):
 
 def paxos_loop(instance):
     global chatLog
-<<<<<<< HEAD
     if paxos_instances[instance].final_value is not None:
         for p in range(max_process):
             if p == pid or process_sock[p] is None:
