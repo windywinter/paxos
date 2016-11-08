@@ -360,10 +360,24 @@ def server_handler(clientsock, peer_id):
 
 def paxos_loop(instance):
     global chatLog
-    while paxos_instances[instance].final_value is None:
-        paxos_instances[instance].prepare()
-        time.sleep(PAXOS_TIMEOUT)
-    chatLog[paxos_instances[instance].final_value] = instance
+    if paxos_instances[instance].final_value is not None:
+        for p in range(max_process):
+            if p == pid or process_sock[p] is None:
+                continue
+            else:
+                res = 'sync ack'
+                for seq_id, msg_id in chatLog.items():
+                    res = res + (' %d %s %d' % (msg_id, msgs[msg_id], seq_id))
+                res += '\n'
+                try:
+                    process_sock[p].sendall(res)
+                except:
+                    pass
+    else:
+        while paxos_instances[instance].final_value is None:
+            paxos_instances[instance].prepare()
+            time.sleep(PAXOS_TIMEOUT)
+        chatLog[paxos_instances[instance].final_value] = instance
     # paxos_instances[instance].storage.remove(instance)
     master_sock.sendall("ack %d %d\n" % (instance, paxos_instances[instance].final_value))
 
@@ -471,6 +485,7 @@ sock_to_server.listen(20)
 for i in range(0, max_process):
     # skip self
     if i == pid:
+        process_sock[i] = None
         continue
     process_sock[i] = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     process_sock[i].setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
