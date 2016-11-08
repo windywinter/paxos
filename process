@@ -20,7 +20,7 @@ master_sock = None
 process_sock = {pid: None} # index by pid
 
 import logging
-logging.basicConfig(format = '['+str(pid)+'] %(levelname)s: %(message)s', level = logging.DEBUG)
+logging.basicConfig(format = '['+str(pid)+'] %(levelname)s: %(message)s', level = logging.ERROR)
 
 paxos_instances = dict()
 
