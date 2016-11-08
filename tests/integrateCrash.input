@@ -1,0 +1,33 @@
+0 start 6 10000
+1 start 6 10001
+2 start 6 10002
+3 start 6 10003
+4 start 6 10004
+5 start 6 10005
+0 msg 0 WhatsYourName
+0 crash
+1 crashAfterP1b
+2 crashP2a 0 1 3
+2 msg 1 HeyMan
+4 waitForAck 1
+0 start 6 10006
+3 msg 2 WhatsUp
+-1 waitForAck 2
+3 crashAfterP2b
+1 start 6 10007
+2 start 6 10008
+4 crashP1a 0 1 2 3 4
+5 crashDecision 0
+4 msg 3 NVM
+5 msg 4 Hahaha
+-1 waitForAck 4
+4 start 6 10009
+5 start 6 10010
+3 start 6 10011
+0 get chatLog
+1 get chatLog
+2 get chatLog
+3 get chatLog
+4 get chatLog
+5 get chatLog
+exit
