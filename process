@@ -57,7 +57,7 @@ class stable_storage:
             stable_storage.logfile = open('%s.log' % pid, 'a')
     
     def log_paxos_progress(self, instance):
-        self.logfile.write('paxos progress %d %d %d %d %d\n' % (instance, paxos_instances[instance].next_proposal_id, paxos_instances[instance].promised_id, paxos_instances[instance].accepted_id, paxos_instances[instance].accepted_value))
+        self.logfile.write('paxos progress %d %d %d %d %d\n' % (instance, proposer.next_proposal_id, paxos_instances[instance].promised_id, paxos_instances[instance].accepted_id, paxos_instances[instance].accepted_value))
         self.logfile.flush()
         
     def log_paxos_decide(self, instance):
@@ -192,12 +192,14 @@ class proposer(object):
         self.accept_rcvd = None
         self.final_value = None
         self.messenger = messenger #server-server comm API
+        logging.debug('next_proposal: %d' % proposer.next_proposal_id)
       
     def prepare(self):
         self.promises_rcvd = set()
         self.accept_rcvd = set()
-        self.proposal_id = self.next_proposal_id
-        self.next_proposal_id += max_process
+        self.proposal_id = proposer.next_proposal_id
+        proposer.next_proposal_id += max_process
+        logging.debug('next_proposal: %d' % proposer.next_proposal_id)
         self.storage.log_paxos_progress(self.instance_id)
         self.messenger.send_prepare(self.proposal_id)
     
@@ -455,7 +457,7 @@ if os.path.isfile('%d.log' %(pid)):
                     if instance not in paxos_instances:
                         paxos_instances[instance] = paxos_instance(instance)
                     if s[1] == 'progress':
-                        paxos_instances[instance].next_proposal_id = max(paxos_instances[instance].next_proposal_id, int(s[3]))
+                        proposer.next_proposal_id = max(proposer.next_proposal_id, int(s[3]))
                         paxos_instances[instance].promised_id = int(s[4])
                         paxos_instances[instance].accepted_id = int(s[5])
                         paxos_instances[instance].accepted_value = int(s[6])
