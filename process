@@ -57,7 +57,7 @@ class stable_storage:
             stable_storage.logfile = open('%s.log' % pid, 'a')
     
     def log_paxos_progress(self, instance):
-        self.logfile.write('paxos progress %d %d %d %d %d\n' % (instance, proposer.next_proposal_id, paxos_instances[instance].promised_id, paxos_instances[instance].accepted_id, paxos_instances[instance].accepted_value))
+        self.logfile.write('paxos progress %d %d %d %d %d\n' % (instance, paxos_instances[instance].next_proposal_id, paxos_instances[instance].promised_id, paxos_instances[instance].accepted_id, paxos_instances[instance].accepted_value))
         self.logfile.flush()
         
     def log_paxos_decide(self, instance):
@@ -193,14 +193,14 @@ class proposer(object):
         self.accept_rcvd = None
         self.final_value = None
         self.messenger = messenger #server-server comm API
-        logging.debug('next_proposal: %d' % proposer.next_proposal_id)
+        logging.debug('next_proposal: %d' % self.next_proposal_id)
       
     def prepare(self):
         self.promises_rcvd = set()
         self.accept_rcvd = set()
-        self.proposal_id = proposer.next_proposal_id
+        self.proposal_id = self.next_proposal_id
         proposer.next_proposal_id += max_process
-        logging.debug('next_proposal: %d' % proposer.next_proposal_id)
+        logging.debug('next_proposal: %d' % self.next_proposal_id)
         self.storage.log_paxos_progress(self.instance_id)
         self.messenger.send_prepare(self.proposal_id)
     
@@ -347,6 +347,7 @@ def server_handler(clientsock, peer_id):
                             sync_seq_id = int(s[index + 2])
                             if sync_msg_id not in msgs:
                                 msgs[sync_msg_id] = sync_msg
+                                stable_storage().log_msg(sync_msg_id)
                             if sync_seq_id not in chatLog:
                                 chatLog[sync_seq_id] = sync_msg_id
                             if sync_msg_id in paxos_instances:
@@ -403,6 +404,7 @@ def master_handler():
                     if msg_id not in msgs:
                         msgs[msg_id] = s[2]
                         paxos_instances[msg_id] = paxos_instance(msg_id)
+                    stable_storage().log_msg(msg_id)
                     thread.start_new_thread(paxos_loop, (msg_id,))
                 elif s[0] == 'get' and s[1] == 'chatLog':
                     res = ''
