@@ -20,7 +20,7 @@ master_sock = None
 process_sock = {pid: None} # index by pid
 
 import logging
-logging.basicConfig(format = '['+str(pid)+'] %(levelname)s: %(message)s', level = logging.DEBUG)
+logging.basicConfig(format = '['+str(pid)+'] %(levelname)s: %(message)s', level = logging.ERROR)
 
 paxos_instances = dict()
 
@@ -283,6 +283,7 @@ def server_handler(clientsock, peer_id):
         try:
             data = clientsock.recv(256)
         except:
+            logging.debug('process %d socker error' % peer_id)
             data = None
         if data:
             logging.debug("data received from %d: " + data, peer_id)
@@ -393,7 +394,9 @@ def master_handler():
                     logging.debug('chatLog: ' + res[:-1] + '\n')
                     master_sock.sendall('chatLog ' + res[:-1] + '\n')
                 elif s[0] == 'crash':
-                    break
+                    master_sock.close()
+                    logging.info('process %d exits', pid)
+                    os._exit(1)
                 elif s[0] == 'crashAfterP1b':
                     crashAfterPromise = True
                 elif s[0] == 'crashAfterP2b':
@@ -473,11 +476,13 @@ for i in range(0, max_process):
     process_sock[i].setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     process_sock[i].bind(('localhost', SERVER_SRC_PORT_BASE+pid))
     status = process_sock[i].connect_ex(('localhost', SERVER_PORT_BASE+i))
-    if status == 0:
-        thread.start_new_thread(server_handler, (process_sock[i], i))
-        process_sock[i].sendall("sync req\n")
-    else:
+    if status != 0:
         process_sock[i] = None
+
+for i in range(0, max_process):
+    if process_sock[i]:
+        process_sock[i].sendall("sync req\n")
+        thread.start_new_thread(server_handler, (process_sock[i], i))
 
 while True:
     # wait for a connection from other process
