@@ -76,7 +76,7 @@ class messenger:
     '''
     # "paxos prepare <instance_id> <proposal_id> <msg>
     def send_prepare(self, proposal_id):
-        global crashAfterPrepare, partialPrepare, process_sock
+        global crashAfterPrepare, partialPrepare
         command = 'paxos prepare %d %d %s\n' % (self.instance_id, proposal_id, msgs[self.instance_id])
         if crashAfterPrepare:
             for p in partialPrepare:
@@ -97,7 +97,7 @@ class messenger:
     
     # 'paxos accept_req <instance_id> <proposal_id> <proposed_value>'
     def send_accept_req(self, proposal_id, proposed_value):
-        global crashAfterAcceptReq, partialAcceptReq, process_sock
+        global crashAfterAcceptReq, partialAcceptReq
         command = 'paxos accept_req %d %d %d\n' % (self.instance_id, proposal_id, proposed_value)
         if crashAfterAcceptReq:
             for p in partialAcceptReq:
@@ -118,7 +118,7 @@ class messenger:
     
     # 'paxos decision <instance_id> <final_value>'
     def send_decision(self, final_value):
-        global crashAfterDecision, partialDecision, process_sock
+        global crashAfterDecision, partialDecision
         command = 'paxos decision %d %d\n' % (self.instance_id, final_value)
         if crashAfterDecision:
             for p in partialDecision:
@@ -142,7 +142,7 @@ class messenger:
     '''
     # 'paxos promise <instance_id> <proposal_id> <accepted_id> <accepted_value>'
     def send_promise(self, from_id, proposal_id, accepted_id, accepted_value):
-        global process_sock, crashAfterPromise
+        global crashAfterPromise
         command = 'paxos promise %d %d %d %d\n' % (self.instance_id ,proposal_id, accepted_id, accepted_value)
         if process_sock[from_id] is not None:
             try:
@@ -154,7 +154,6 @@ class messenger:
         
     # 'paxos rej <instance_id> <proposal_id> <promise_id>'
     def send_rej(self, from_id, proposal_id, promise_id):
-        global process_sock
         command = 'paxos rej %d %d %d\n' % (self.instance_id, proposal_id, promise_id)
         if process_sock[from_id] is not None:
             try:
@@ -164,7 +163,7 @@ class messenger:
     
     # 'paxos accept_ack <instance_id> <proposal_id> <accepted_value>'
     def send_accept_ack(self, from_id, proposal_id, accepted_value):
-        global process_sock, crashAfterAcceptAck
+        global crashAfterAcceptAck
         command = 'paxos accept_ack %d %d %d\n' % (self.instance_id, proposal_id, accepted_value)
         if process_sock[from_id] is not None:
             try:
@@ -223,6 +222,7 @@ class proposer(object):
         
         if len(self.accept_rcvd) == max_process/2+1:
             self.final_value = value
+            self.storage.log_paxos_decide(self.instance_id)
             self.messenger.send_decision(self.final_value)
 
 class acceptor(object):
@@ -277,7 +277,7 @@ class paxos_instance(proposer, acceptor):
             self.recv_accept_ack(pid, proposal_id, self.accepted_value)
 
 def server_handler(clientsock, peer_id):
-    global msgs, process_sock, paxos_instances, chatLog
+    global msgs, paxos_instances, chatLog
     logging.info('connection from %d established', peer_id)
     while True:
         try:
@@ -360,6 +360,7 @@ def server_handler(clientsock, peer_id):
 
 def paxos_loop(instance):
     global chatLog
+<<<<<<< HEAD
     if paxos_instances[instance].final_value is not None:
         for p in range(max_process):
             if p == pid or process_sock[p] is None:
@@ -464,17 +465,13 @@ if os.path.isfile('%d.log' %(pid)):
                         chatLog[paxos_instances[instance].final_value] = instance
                 elif s[0] == 'msg':
                     msgs[int(s[1])] = s[2]
-# start running
+
+#create socket for master
 sock_to_master = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock_to_master.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sock_to_master.bind(('localhost', master_port))
 # Listen for incoming connections
 sock_to_master.listen(1)
-# Wait for a master connection
-# Blocking until got connection from master
-master_sock, _ = sock_to_master.accept()
-# start new thread to handle master connection
-thread.start_new_thread(master_handler, ())
 
 # create socket for server to server communication
 sock_to_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -498,6 +495,11 @@ for i in range(0, max_process):
     if process_sock[i]:
         process_sock[i].sendall("sync req\n")
         thread.start_new_thread(server_handler, (process_sock[i], i))
+
+# start responding to master
+master_sock, _ = sock_to_master.accept()
+# start new thread to handle master connection
+thread.start_new_thread(master_handler, ())
 
 while True:
     # wait for a connection from other process
