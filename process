@@ -385,13 +385,6 @@ def paxos_loop(instance):
     # paxos_instances[instance].storage.remove(instance)
     master_sock.sendall("ack %d %d\n" % (instance, paxos_instances[instance].final_value))
 
-def paxos_query(instance):
-    global chatLog
-    paxos_instances[instance].prepare()
-    time.sleep(PAXOS_TIMEOUT)
-    if paxos_instances[instance].final_value is not None:
-        chatLog[paxos_instances[instance].final_value] = instance
-
 def master_handler():
     global msgs, paxos_instances, chatLog, master_sock, crashAfterAcceptAck, crashAfterAcceptReq, crashAfterDecision, crashAfterPrepare, crashAfterPromise, partialPrepare, partialDecision, partialAcceptReq
     while True:
@@ -414,10 +407,13 @@ def master_handler():
                     stable_storage().log_msg(msg_id)
                     thread.start_new_thread(paxos_loop, (msg_id,))
                 elif s[0] == 'get' and s[1] == 'chatLog':
-                    for id, instance in paxos_instances.iteritems():
+                    for instance in paxos_instances.itervalues():
                         if instance.accepted_value != -1 and instance.final_value is None:
-                            thread.start_new_thread(paxos_query, (id,))
+                            thread.start_new_thread(paxos_instance.prepare, (instance,))
                     time.sleep(PAXOS_TIMEOUT)
+                    for instance in paxos_instances.itervalues():
+                        if instance.final_value is not None:
+                            chatLog[instance.final_value] = instance.instance_id
                     res = ''
                     for _, msg_id in chatLog.items():
                         res = res + msgs[msg_id] + ','
