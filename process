@@ -122,7 +122,8 @@ class messenger:
         command = 'paxos decision %d %d\n' % (self.instance_id, final_value)
         if crashAfterDecision:
             for p in partialDecision:
-                if process_sock[p] is None:
+                if process_sock[p] is not None:
+                    logging.debug('%d send partial decision to %d' % (pid, p))
                     try:
                         process_sock[p].sendall(command)
                     except:

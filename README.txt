@@ -1,3 +1,10 @@
+gl345
+Slip days used (this project): 1      Slip days used (total): 2
+
+ml2436
+Slip days used (this project): 1      Slip days used (total): 1
+
+
 Requirements: Linux OS, Python 2.7.12.
 
 We only have a single "process" python script, not "./build" needed and no ./src/ directory
@@ -22,3 +29,6 @@ P1 and P2 crash after sending promise. The proposal for 'Alice' might be able to
 
 5. partialP2b.input
 P1~P3 crash after sending accept_ack, the only left is P0. So P0 will store the value. After P1~P3 recover, they will finish the proposal for 'NoIdea' and learn from P0 about 'WhatsYourName'.
+
+6. integrateCrash.input
+A complex test case that tests all crash commands.
